@@ -1,0 +1,30 @@
+Copier l'intégralité du projet
+	git clone chemin
+
+__________________________
+
+Traquer des fichiers (Ajouter à la liste des fichiers du projet)
+	git add fichier
+	git add -A
+
+__________________________
+
+Enregistrer un changement
+	
+	git status
+	git commit -am "Message"
+
+____________________________
+
+git pull origin master
+
+git push origin master
+
+____________________________
+
+git log
+
+____________________________
+
+git config --global user.name "John Doe"
+git config --global user.email johndoe@example.com
