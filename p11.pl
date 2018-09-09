@@ -162,6 +162,8 @@ etatSuccesseur([N,M,C,R,P,B],steal(X),[N,M,C,R,PF,B]) :-
   add_in_set([IDJ,NomJ,PosX,PosY,BJ],P2,P3),
   add_in_set([IDE,NomE,X1,Y2,BE],P3,PF).
 
+etatSuccesseur(E,pass(),E).
+
 
 adjust(1,X1,Y1,X1,Y2) :- Y2 is Y1+1.
 adjust(2,X1,Y1,X2,Y1) :- X2 is X1+1.
