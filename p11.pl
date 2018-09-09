@@ -111,7 +111,7 @@ empty_check_P([[_,_,TX,TY,_]|Z],X,TY) :- X \= TX, empty_check_P(Z,X,TY).
 empty_check_P([[_,_,TX,TY,_]|Z],X,Y) :- X \= TX, Y \= TY, empty_check_P(Z,X,Y).
 
 get_player([[ID,Nom,X,Y,B]|_],X,Y,[ID,Nom,X,Y,B]).
-get_player([[_,_,PosX,PosY,_]|Z],X,Y,R) :- PosX \= X, PosY \= Y, get_player(Z,X,Y,R).
+get_player([[_,_,_,_,_]|Z],X,Y,R) :- get_player(Z,X,Y,R).
 
 %-----------------------------------------------------------------------------
 % Actions
@@ -128,6 +128,7 @@ actionsPossibles(Etat,R) :-
   append(Moves,Takes,L1),
   append(L1,Drops,L2),
   append(L2,Steals,R).
+
 
 
 move(1,Etat) :- myStatus(Etat,[_,_,X,Y,_]),Y2 is Y+1, empty(Etat,X,Y2).
@@ -167,6 +168,6 @@ steal(7,[_,_,_,_,P,_],Victory) :- myStatus(P,[_,_,X,Y,B]), X2 is X-1, Y2 is Y-1,
 steal(8,[_,_,_,_,P,_],Victory) :- myStatus(P,[_,_,X,Y,B]), X2 is X-1, Y2 is Y+1, get_player(P,X2,Y2,[_,_,_,_,BJ]), BJ \= 0, calc_prob(B,BJ,Victory).
 
 calc_prob(0,_,25).
-calc_prob(B1,B2,B1/(B1+B2)) :- B1 \= 0.
+calc_prob(B1,B2,100*B1/(B1+B2)) :- B1 \= 0.
 
 pass().
