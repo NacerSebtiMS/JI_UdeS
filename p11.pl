@@ -113,6 +113,9 @@ empty_check_P([[_,_,TX,TY,_]|Z],X,Y) :- X \= TX, Y \= TY, empty_check_P(Z,X,Y).
 get_player([[ID,Nom,X,Y,B]|_],X,Y,[ID,Nom,X,Y,B]).
 get_player([[_,_,_,_,_]|Z],X,Y,R) :- get_player(Z,X,Y,R).
 
+get_block([[ID,X,Y]|_],X,Y,[ID,X,Y]).
+get_block([[_,_,_]|Z],X,Y,R) :- get_block(Z,X,Y,R).
+
 %-----------------------------------------------------------------------------
 % Actions
 %     E = [4,3,4,4,[[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]]
@@ -129,7 +132,45 @@ actionsPossibles(Etat,R) :-
   append(L1,Drops,L2),
   append(L2,Steals,R).
 
+etatSuccesseur([N,M,C,R,P,B],move(X),[N,M,C,R,PF,B]) :-
+  myStatus(P,[ID,Nom,PosX,PosY,BJ]),
+  delete_in_set([ID,Nom,PosX,PosY,BJ],P,P1),
+  adjust(X,PosX,PosY,X1,Y1),
+  add_in_set([ID,Nom,X1,Y1,BJ],P1,PF).
 
+etatSuccesseur([N,M,C,R,P,B],take(X),[N,M,C,R,PF,BF]) :-
+  myStatus(P,[ID,Nom,PosX,PosY,BJ]),
+  adjust(X,PosX,PosY,X1,Y1),
+  get_block(B,X1,Y1,[IDB,X1,Y2]),
+  delete_in_set([ID,Nom,PosX,PosY,BJ],P,P1),
+  add_in_set([ID,Nom,PosX,PosY,IDB],P1,PF),
+  delete_in_set([IDB,X1,Y2],B,BF).
+
+etatSuccesseur([N,M,C,R,P,B],drop(X),[N,M,C,R,PF,BF]) :-
+  myStatus(P,[ID,Nom,PosX,PosY,BJ]),
+  delete_in_set([ID,Nom,PosX,PosY,BJ],P,P1),
+  adjust(X,PosX,PosY,X1,Y1),
+  add_in_set([ID,Nom,PosX,PosY,0],P1,PF),
+  add_in_set(B,[BJ,X1,Y1],BF).
+
+etatSuccesseur([N,M,C,R,P,B],steal(X),[N,M,C,R,PF,B]) :-
+  myStatus(P,[IDJ,NomJ,PosX,PosY,BJ]),
+  adjust(X,PosX,PosY,X1,Y1),
+  get_player(P,X1,Y1,[IDE,NomE,X1,Y2,BE]),
+  delete_in_set([IDJ,NomJ,PosX,PosY,BJ],P,P1),
+  delete_in_set([IDE,NomE,X1,Y2,BE],P1,P2),
+  add_in_set([IDJ,NomJ,PosX,PosY,BJ],P2,P3),
+  add_in_set([IDE,NomE,X1,Y2,BE],P3,PF).
+
+
+adjust(1,X1,Y1,X1,Y2) :- Y2 is Y1+1.
+adjust(2,X1,Y1,X2,Y1) :- X2 is X1+1.
+adjust(3,X1,Y1,X1,Y2) :- Y2 is Y1-1.
+adjust(4,X1,Y1,X2,Y1) :- X2 is X1-1.
+adjust(5,X1,Y1,X2,Y2) :- X2 is X1+1, Y2 is Y1+1.
+adjust(6,X1,Y1,X2,Y2) :- X2 is X1+1, Y2 is Y1-1.
+adjust(7,X1,Y1,X2,Y2) :- X2 is X1-1, Y2 is Y1-1.
+adjust(8,X1,Y1,X2,Y2) :- X2 is X1+1, Y2 is Y1+1.
 
 move(1,Etat) :- myStatus(Etat,[_,_,X,Y,_]),Y2 is Y+1, empty(Etat,X,Y2).
 move(2,Etat) :- myStatus(Etat,[_,_,X,Y,_]),X2 is X+1, empty(Etat,X2,Y).
@@ -171,3 +212,14 @@ calc_prob(0,_,25).
 calc_prob(B1,B2,100*B1/(B1+B2)) :- B1 \= 0.
 
 pass().
+
+%-----------------------------------------------------------------------------
+% SET FUNCTIONS
+%-----------------------------------------------------------------------------
+
+delete_in_set(_, [], []) :- !.
+delete_in_set(E, [E|T], T) :- !.
+delete_in_set(E, [H|T], [H|Tnew]) :- delete_in_set(E,T,Tnew).
+
+add_in_set(E, S, S) :- member(E,S), !.
+add_in_set(E, S, [E|S]).
