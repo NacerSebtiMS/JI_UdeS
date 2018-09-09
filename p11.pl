@@ -87,7 +87,29 @@ trouveAction(EtatJeu, ProchaineAction) :-
 %                 - x est l’index de la colonne de sa position (un entier)
 %                 - y est l’index de la rangée de sa position (un entier)
 %-----------------------------------------------------------------------------
+% Construction de graph
+%-----------------------------------------------------------------------------
+trouverPlan(EF,EF,[]).
+
+trouverPlan(EI,EF,Plan) :-
+  creer_profondeur(EI,EF,[EI],Plan).
+
+creer_profondeur(EI,EF,_,[Action]) :-
+  actionsPossibles(EI,[Action|_]),
+  etatSuccesseur(EI,Action,EF).
+
+creer_profondeur(EI,EF,EXE,Plan) :-
+  actionsPossibles(EI,[Action|_]),
+  etatSuccesseur(EI,Action,ES),
+  not(member(ES,EXE)),
+  ES \= EF,
+  add_in_set(ES,EXE,E1),
+  creer_profondeur(ES,EF,E1,P2),
+  add_in_set([Action],P2,Plan).
+
+%-----------------------------------------------------------------------------
 % Lecture de l'etat
+% [4,3,4,4,[[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]],[4,3,4,4,[[2,'Feim',3,1,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]]
 %-----------------------------------------------------------------------------
 
 % myStatus(+Etat,-Statut)
@@ -96,9 +118,7 @@ myStatus([[_,Nom,_,_,_]|Z],L) :- p11_nom(N), N \= Nom, myStatus(Z,L).
 myStatus([_,_,_,_,[[ID,Nom,X,Y,B]|_],_],[ID,Nom,X,Y,B]) :- p11_nom(N), N = Nom.
 myStatus([_,_,_,_,[[_,Nom,_,_,_]|Z],_],L) :- p11_nom(N), N \= Nom, myStatus(Z,L).
 
-border([_,_,X,Y,_,_],X,Y).
-
-empty([_,_,_,_,P,B],X,Y) :- X>=0, Y>=0, empty_check_P(P,X,Y), empty_check_B(B,X,Y).
+empty([_,_,C,R,P,B],X,Y) :- X>=0, Y>=0, R-1>=X, C-1>=Y, empty_check_P(P,X,Y), empty_check_B(B,X,Y).
 
 empty_check_B([],_,_).
 empty_check_B([[_,TX,TY]|Z],TX,Y) :- Y \= TY, empty_check_B(Z,TX,Y).
@@ -121,6 +141,8 @@ get_block([[_,_,_]|Z],X,Y,R) :- get_block(Z,X,Y,R).
 %     E = [4,3,4,4,[[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]]
 %     P = [[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]]
 %     B = [[1,1,3],[3,3,2],[2,0,1]]
+%
+%   [4,3,4,4,[[2,'Feim',3,3,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]]
 %-----------------------------------------------------------------------------
 
 actionsPossibles(Etat,R) :-
