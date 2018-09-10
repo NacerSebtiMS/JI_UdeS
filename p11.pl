@@ -88,25 +88,97 @@ trouveAction(EtatJeu, ProchaineAction) :-
 %                 - y est l’index de la rangée de sa position (un entier)
 %-----------------------------------------------------------------------------
 % Construction de graph
+/*
+
+p11:trouverPlan_Profondeur([4,3,4,4,[[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]],[4,3,4,4,[[2,'Feim',3,3,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]],P).
+
+p11:trouverPlan_Profondeur([4,3,4,4,[[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]],[4,3,4,4,[[2,'Feim',3,3,0]|_],_],P).
+*/
 %-----------------------------------------------------------------------------
-trouverPlan(EF,EF,[]).
+
+%
+% PROFONDEUR
+%
+
+trouverPlan_Profondeur(EI,EF,P) :-
+  explore_Profondeur([[EI,[]]],[],EF,P),write_ln(P).
+
+explore_Profondeur(Liste,_,EF,P) :-
+  member([EF,P],Liste).
+
+explore_Profondeur([[E,Way]|Z],EX,EF,P) :-
+  E \= EF,
+  not(member([EF,_],Z)),
+  actionsPossibles(E,A),
+  stuffIt_Profondeur([E,Way],EF,A,EX,L),
+  append(L,Z,Adventure),
+  append([E],EX,EX2),
+  %write_ln(Adventure),
+  explore_Profondeur(Adventure,EX2,EF,P).
+
+stuffIt_Profondeur(_,_,[],_,[]).
+
+stuffIt_Profondeur([E,Way],EF,[A|_],EX,[[EF,NWay]]) :-
+  etatSuccesseur(E,A,EF),
+  append(Way,[A],NWay).
+
+stuffIt_Profondeur([E,Way],EF,[A|Z],EX,L) :-
+  etatSuccesseur(E,A,ES),
+  ES \= EF,
+  member(ES,EX),
+  stuffIt_Profondeur([E,Way],EF,Z,EX,L).
+
+stuffIt_Profondeur([E,Way],EF,[A|Z],EX,L) :-
+  etatSuccesseur(E,A,ES),
+  ES \= EF,
+  not(member(ES,EX)),
+  stuffIt_Profondeur([E,Way],EF,Z,EX,L1),
+  append(Way,[A],NWay),
+  append([[ES,NWay]],L1,L).
+
+/*trouverPlan(EF,EF,[]).
+
+trouverPlan(EI,EF,P) :-
+  actionsPossibles(EI,A),
+  parc(EI,EF,A,Exp,P),
+  P \= [].
+
+trouverPlan(EI,EF,P) :-
+  actionsPossibles(EI,A),
+  parc(EI,EF,A,[]),
+  loopz()
 
 trouverPlan(EI,EF,Plan) :-
-  creer_profondeur(EI,EF,[EI],Plan).
+  actionsPossibles(EI,Actions),
 
-creer_profondeur(EI,EF,_,[Action]) :-
-  actionsPossibles(EI,[Action|_]),
-  etatSuccesseur(EI,Action,EF).
+parc(EI,EF,[],[],[]).
+parc(EI,EF,[A|_],[A]) :-
+  etatSuccesseur(EI,A,EF).
+parc(EI,EF,[A|Z],P) :-
+  etatSuccesseur(EI,A,E),
+  E \= EF,
+  parc(EI,E,Z,P).
+
+creer_profondeur(EI,EF,_,[A]) :-
+  actionsPossibles(EI,A),
+  etatSuccesseur(EI,A,EF).
 
 creer_profondeur(EI,EF,EXE,Plan) :-
-  actionsPossibles(EI,[Action|_]),
-  etatSuccesseur(EI,Action,ES),
+  actionsPossibles(EI,[A|_]),
+  etatSuccesseur(EI,A,ES),
   not(member(ES,EXE)),
   ES \= EF,
   add_in_set(ES,EXE,E1),
-  creer_profondeur(ES,EF,E1,P2),
-  add_in_set([Action],P2,Plan).
+  actionsPossibles(ES,A2),
+  creer_profondeur(ES,EF,E1,A2,P2),
+  write(A),
+  add_in_set(A,P2,Plan).
 
+explore(EI,EF,EXE,A,Plan) :-
+  etatSuccesseur(EI,A,EF).
+
+explore(EI,EF,EXE,A,Plan) :-
+*/
 %-----------------------------------------------------------------------------
 % Lecture de l'etat
 % [4,3,4,4,[[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]],[4,3,4,4,[[2,'Feim',3,1,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]]
@@ -173,7 +245,7 @@ etatSuccesseur([N,M,C,R,P,B],drop(X),[N,M,C,R,PF,BF]) :-
   delete_in_set([ID,Nom,PosX,PosY,BJ],P,P1),
   adjust(X,PosX,PosY,X1,Y1),
   add_in_set([ID,Nom,PosX,PosY,0],P1,PF),
-  add_in_set(B,[BJ,X1,Y1],BF).
+  add_in_set(B,[[BJ,X1,Y1]],BF).
 
 etatSuccesseur([N,M,C,R,P,B],steal(X),[N,M,C,R,PF,B]) :-
   myStatus(P,[IDJ,NomJ,PosX,PosY,BJ]),
@@ -181,8 +253,8 @@ etatSuccesseur([N,M,C,R,P,B],steal(X),[N,M,C,R,PF,B]) :-
   get_player(P,X1,Y1,[IDE,NomE,X1,Y2,BE]),
   delete_in_set([IDJ,NomJ,PosX,PosY,BJ],P,P1),
   delete_in_set([IDE,NomE,X1,Y2,BE],P1,P2),
-  add_in_set([IDJ,NomJ,PosX,PosY,BJ],P2,P3),
-  add_in_set([IDE,NomE,X1,Y2,BE],P3,PF).
+  add_in_set([IDE,NomE,X1,Y2,BE],P2,P3),
+  add_in_set([IDJ,NomJ,PosX,PosY,BJ],P3,PF).
 
 etatSuccesseur(E,pass(),E).
 
