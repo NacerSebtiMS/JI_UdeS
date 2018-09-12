@@ -15,7 +15,7 @@
 p11_nom('Feim').
 
 % Auteurs du JI: p11_auteurs(-Auteurs)
-p11_auteurs('MAN').
+p11_auteurs('Meriem & Adriatik & Nacer').
 
 % Remise à zero du JI: p11_reset
 p11_reset :-
@@ -128,18 +128,11 @@ trouveAction(EtatJeu, ProchaineAction) :-
 %                 - y est l’index de la rangée de sa position (un entier)
 %-----------------------------------------------------------------------------
 % Construction de graph
-/*
-
-p11:trouverPlan_Profondeur([4,3,4,4,[[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]],[4,3,4,4,[[2,'Feim',3,3,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]],P).
-
-p11:trouverPlan_Profondeur([4,3,4,4,[[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]],[4,3,4,4,[[2,'Feim',3,3,0]|_],_],P).
-*/
 %-----------------------------------------------------------------------------
 
-
-%
+%-----------------------------------------------------------------------------
 % PROFONDEUR
-%
+%-----------------------------------------------------------------------------
 
 trouverPlan_Profondeur(EI,EF,P) :-
   explore_Profondeur([[EI,[]]],[],EF,P).
@@ -161,8 +154,6 @@ explore_Profondeur([[E,Way]|Z],EX,EF,P) :-
   append([E],EX,EX2),
   stuffIt_Profondeur([E,Way],EF,A,EX2,L),
   append(L,Z,Adventure),
-
-  %write_ln(Adventure),
   explore_Profondeur(Adventure,EX2,EF,P).
 
 stuffIt_Profondeur(_,_,[],_,[]).
@@ -185,12 +176,10 @@ stuffIt_Profondeur([E,Way],EF,[A|Z],EX,L) :-
   append(Way,[A],NWay),
   append([[ES,NWay]],L1,L).
 
-%
-% Largeur
-%
-/*
-p11:trouverPlan_Largeur([4,3,4,4,[[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]],[4,3,4,4,[[2,'Feim',3,3,0]|_],_],P).
-*/
+%-----------------------------------------------------------------------------
+% LARGEUR
+%-----------------------------------------------------------------------------
+
 trouverPlan_Largeur(EI,EF,P) :-
   explore_Largeur([[EI,[]]],[],EF,P).
 
@@ -233,15 +222,10 @@ stuffIt_Largeur([E,Way],EF,[A|Z],EX,L) :-
   append(Way,[A],NWay),
   append([[ES,NWay]],L1,L).
 
-%
-% A Greedy
-%
-/*
-p11:trouverPlan_A_Greedy([4,3,4,4,[[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]],[4,3,4,4,[[2,'Feim',3,3,0]|_],_],P).
-*/
-/*
-p11:h([1,1,4,4,[[1,'Feim',0,2,0]],[[1,3,0]]],H).
-*/
+%-----------------------------------------------------------------------------
+% A GREEDY
+%-----------------------------------------------------------------------------
+
 find_THE_Block([_,M,_,_,_,B],X,Y) :-
   look_blocks(M,B,X,Y).
 find_THE_Block([_,M,_,_,P,_],X,Y) :-
@@ -263,13 +247,6 @@ h(EtatJeu,H) :-
   myStatus(EtatJeu,[_,_,MyX,MyY,_]),
   H is sqrt( (X-MyX)*(X-MyX) + (Y-MyY)*(Y-MyY) ).
   %H is (B-MyB)*sqrt( (X-MyX)*(X-MyX) + (Y-MyY)*(Y-MyY) ).
-
-/*
-calc_H([ [X,Way] ],H,[X,Way]) :- h(X,H).
-calc_H([ [X,Way]|Z ],H,[E,Way]) :- h(X,H), write_ln(1:Z), calc_H(Z,H2,_), H <= H2, write_ln(H <= H2).
-calc_H([ [X,_]|Z ],H,[E,Way]) :- h(X,H1),write_ln(2:Z), calc_H(Z,H,[E,Way]), write_ln(3:H), H < H1, write_ln(H < H1).
-*/
-
 
 min([X],X) :- !, true.
 min([[X,HX,WX]|Xs], [X,HX,WX]):- min(Xs, [_,HY,_]), HY >= HX.
@@ -323,10 +300,10 @@ stuffIt_A_Greedy([E,H,Way],EF,[A|Z],EX,L) :-
   h(ES,H2),
   append([[ES,H2,NWay]],L1,L).
 
-
-%
+%-----------------------------------------------------------------------------
 % A*
-%
+%-----------------------------------------------------------------------------
+
 len([],0).
 len([_|Z],L) :- len(Z,N), L is N+1.
 
@@ -384,7 +361,6 @@ stuffIt_A_Star([E,H,Way],EF,[A|Z],EX,L) :-
 
 %-----------------------------------------------------------------------------
 % Lecture de l'etat
-% [4,3,4,4,[[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]],[4,3,4,4,[[2,'Feim',3,1,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]]
 %-----------------------------------------------------------------------------
 
 % myStatus(+Etat,-Statut)
@@ -413,14 +389,7 @@ get_block([[_,_,_]|Z],X,Y,R) :- get_block(Z,X,Y,R).
 
 %-----------------------------------------------------------------------------
 % Actions
-%     E = [4,3,4,4,[[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]]
-%     P = [[2,'Feim',0,2,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]]
-%     B = [[1,1,3],[3,3,2],[2,0,1]]
-%
-%   [4,3,4,4,[[2,'Feim',3,3,0],[3,'Zouf',1,0,0],[1,'Ares',3,0,0],[4,'Buddy',2,2,0]],[[1,1,3],[3,3,2],[2,0,1]]]
 %-----------------------------------------------------------------------------
-aP(E,R) :-
-  actionsPossibles(E,R),write_ln(R).
 
 actionsPossibles(Etat,R) :-
   findall(move(X),move(X,Etat),Moves),
@@ -430,9 +399,6 @@ actionsPossibles(Etat,R) :-
   append(Moves,Takes,L1),
   append(L1,Drops,L2),
   append(L2,Steals,R).
-
-eS(X,A,Y) :-
-  etatSuccesseur(X,A,Y), write_ln(Y).
 
 etatSuccesseur([N,M,C,R,P,B],move(X),[N,M,C,R,PF,B]) :-
   myStatus(P,[ID,Nom,PosX,PosY,BJ]),
@@ -539,14 +505,3 @@ delete_in_set(E, [H|T], [H|Tnew]) :- delete_in_set(E,T,Tnew).
 
 add_in_set(E, S, S) :- member(E,S), !.
 add_in_set(E, S, [E|S]).
-
-/*
-    LAB
-      [30,2,8,8,[[1,'Inconnu1',4,3,0],[2,'Inconnu2',1,0,0],[3,'Inconnu3',2,4,0],[4,'Inconnu4',3,0,0],[5,'Inconnu5',4,0,0],[6,'Inconnu6',5,0,0],[7,'Inconnu7',6,0,0],[8,'Inconnu8',7,0,0],[9,'Inconnu9',1,5,0],[10,'Inconnu10',1,1,0],[11,'Feim',0,0,0],[12,'Inconnu12',6,6,0],[13,'Inconnu13',6,5,0],[14,'Inconnu14',3,4,0],[15,'Inconnu15',6,1,0],[16,'Inconnu16',4,4,0],[17,'Inconnu17',4,5,0],[18,'Inconnu18',1,2,0],[19,'Inconnu19',2,2,0],[20,'Inconnu20',3,2,0],[21,'Inconnu21',4,2,0],[22,'Inconnu22',5,4,0],[23,'Inconnu23',6,3,0],[24,'Inconnu24',7,2,0],[25,'Inconnu25',4,6,0],[26,'Inconnu26',1,4,0],[27,'Inconnu27',2,5,0],[28,'Inconnu28',2,6,0],[29,'Inconnu29',3,7,0],[30,'Inconnu30',6,4,0]],[[1,0,4],[2,2,0]]].
-
-      [30,1,8,8,[[1,'Inconnu1',4,3,0],[2,'Inconnu2',1,0,0],[3,'Inconnu3',2,4,0],[4,'Inconnu4',3,0,0],[5,'Inconnu5',4,0,0],[6,'Inconnu6',5,0,0],[7,'Inconnu7',6,0,0],[8,'Inconnu8',7,0,0],[9,'Inconnu9',1,5,0],[10,'Inconnu10',1,1,0],[11,'Feim',0,0,0],[12,'Inconnu12',6,6,0],[13,'Inconnu13',6,5,0],[14,'Inconnu14',3,4,0],[15,'Inconnu15',6,1,0],[16,'Inconnu16',4,4,0],[17,'Inconnu17',4,5,0],[18,'Inconnu18',1,2,0],[19,'Inconnu19',2,2,0],[20,'Inconnu20',3,2,0],[21,'Inconnu21',4,2,0],[22,'Inconnu22',5,4,0],[23,'Inconnu23',6,3,0],[24,'Inconnu24',7,2,0],[25,'Inconnu25',4,6,0],[26,'Inconnu26',1,4,0],[27,'Inconnu27',2,5,0],[28,'Inconnu28',2,6,0],[29,'Inconnu29',3,7,0],[30,'Inconnu30',6,4,0]],[[1,2,0]]]
-    PDF
-       [4,3,4,4,[[2,'Feim',0,2,0],[1,'Inconnu1',2,2,0],[3,'Inconnu3',1,0,0],[4,'Inconnu4',3,0,0]],[[1,0,1],[2,1,3],[3,3,2]]]
-    Tester
-      [5,1,5,5,[[1,'Inconnu1',1,2,0],[2,'Inconnu2',0,2,0],[3,'Feim',0,0,0],[4,'Inconnu4',2,2,0],[5,'Inconnu5',3,2,0]],[[1,0,4]]]
-*/
